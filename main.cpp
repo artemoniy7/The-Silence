@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <ctime>
+#include <cstdint>
 
 struct Button {
     std::string text;
@@ -133,8 +135,8 @@ int main() {
             alpha = std::max(alpha, 0);
 
             sf::RectangleShape stripe(sf::Vector2f(static_cast<float>(screenWidth) / 18.0f + 1.0f, static_cast<float>(screenHeight)));
-            stripe.setPosition(x * screenWidth, 0.0f);
-            stripe.setFillColor(sf::Color(255, 255, 255, static_cast<sf::Uint8>(alpha)));
+            stripe.setPosition({x * screenWidth, 0.0f});
+            stripe.setFillColor(sf::Color(255, 255, 255, static_cast<std::uint8_t>(alpha)));
             window.draw(stripe);
         }
 
@@ -172,13 +174,13 @@ int main() {
 
         if (fontLoaded) {
             sf::Text title(font, "The silence", 56);
-            title.setPosition(menuLeft, 120.0f);
+            title.setPosition({menuLeft, 120.0f});
             title.setFillColor(sf::Color::White);
             window.draw(title);
         }
 
         sf::RectangleShape divider(sf::Vector2f(310.0f, 2.0f));
-        divider.setPosition(menuLeft, 195.0f);
+        divider.setPosition({menuLeft, 195.0f});
         divider.setFillColor(sf::Color(255, 255, 255, 90));
         window.draw(divider);
 
@@ -188,25 +190,25 @@ int main() {
 
             const float pulseGlow = 40.0f * b.pulse;
             sf::RectangleShape glow({b.rect.size.x + pulseGlow * 0.4f, b.rect.size.y + pulseGlow * 0.2f});
-            glow.setPosition(x - pulseGlow * 0.2f, y - pulseGlow * 0.1f);
-            glow.setFillColor(sf::Color(255, 255, 255, static_cast<sf::Uint8>(20 + 35 * b.pulse)));
+            glow.setPosition({x - pulseGlow * 0.2f, y - pulseGlow * 0.1f});
+            glow.setFillColor(sf::Color(255, 255, 255, static_cast<std::uint8_t>(20 + 35 * b.pulse)));
             window.draw(glow);
 
             sf::RectangleShape body({b.rect.size.x, b.rect.size.y});
-            body.setPosition(x, y);
+            body.setPosition({x, y});
             body.setFillColor(sf::Color::Black);
             body.setOutlineThickness(2.0f);
-            body.setOutlineColor(sf::Color(static_cast<sf::Uint8>(210 + 40 * b.pulse), static_cast<sf::Uint8>(210 + 40 * b.pulse), static_cast<sf::Uint8>(210 + 40 * b.pulse)));
+            body.setOutlineColor(sf::Color(static_cast<std::uint8_t>(210 + 40 * b.pulse), static_cast<std::uint8_t>(210 + 40 * b.pulse), static_cast<std::uint8_t>(210 + 40 * b.pulse)));
             window.draw(body);
 
             if (fontLoaded) {
                 sf::Text text(font, b.text, 30);
                 text.setFillColor(sf::Color::White);
                 sf::FloatRect bounds = text.getLocalBounds();
-                text.setPosition(
+                text.setPosition({
                     x + (b.rect.size.x - bounds.size.x) * 0.5f,
                     y + (b.rect.size.y - bounds.size.y) * 0.5f - 8.0f
-                );
+                });
                 window.draw(text);
             }
         }
