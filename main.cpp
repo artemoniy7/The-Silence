@@ -3,11 +3,12 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
+#include <ctime>
+#include <optional>
 #include <string>
 #include <vector>
-#include <ctime>
-#include <cstdint>
 
 struct Button {
     std::string text;
@@ -34,15 +35,15 @@ int main() {
     constexpr unsigned int screenWidth = 1280;
     constexpr unsigned int screenHeight = 720;
 
-    sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "The silence - Menu prototype (SFML)");
+    sf::RenderWindow window(sf::VideoMode({screenWidth, screenHeight}), "The silence - Menu prototype (SFML)");
     window.setFramerateLimit(60);
 
     sf::Font font;
-    std::array<std::string, 4> fontCandidates = {
+    const std::array<std::string, 4> fontCandidates = {
+        "C:/Windows/Fonts/arial.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
-        "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
-        "C:/Windows/Fonts/arial.ttf"
+        "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
     };
 
     bool fontLoaded = false;
@@ -75,17 +76,18 @@ int main() {
         float dt = frameClock.restart().asSeconds();
         dt = std::min(dt, 0.033f);
 
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
+        while (const std::optional<sf::Event> event = window.pollEvent()) {
+            if (event->is<sf::Event::Closed>()) {
                 window.close();
             }
 
-            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-                const sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-                for (size_t i = 0; i < buttons.size(); ++i) {
-                    if (buttons[i].rect.contains(mouse) && i == 2) {
-                        window.close();
+            if (const auto* mousePressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if (mousePressed->button == sf::Mouse::Button::Left) {
+                    const sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+                    for (size_t i = 0; i < buttons.size(); ++i) {
+                        if (buttons[i].rect.contains(mouse) && i == 2) {
+                            window.close();
+                        }
                     }
                 }
             }
@@ -130,18 +132,18 @@ int main() {
         window.clear(sf::Color(7, 7, 9));
 
         for (int i = 0; i < 18; ++i) {
-            float x = static_cast<float>(i) / 18.0f;
+            const float x = static_cast<float>(i) / 18.0f;
             int alpha = 10 + static_cast<int>(14.0f * std::sin(ambientTimer * 0.7f + x * 8.0f));
             alpha = std::max(alpha, 0);
 
-            sf::RectangleShape stripe(sf::Vector2f(static_cast<float>(screenWidth) / 18.0f + 1.0f, static_cast<float>(screenHeight)));
-            stripe.setPosition({x * screenWidth, 0.0f});
+            sf::RectangleShape stripe({static_cast<float>(screenWidth) / 18.0f + 1.0f, static_cast<float>(screenHeight)});
+            stripe.setPosition({x * static_cast<float>(screenWidth), 0.0f});
             stripe.setFillColor(sf::Color(255, 255, 255, static_cast<std::uint8_t>(alpha)));
             window.draw(stripe);
         }
 
         for (const Runner& r : runners) {
-            sf::VertexArray beam(sf::Lines, 2);
+            sf::VertexArray beam(sf::PrimitiveType::Lines, 2);
             beam[0].position = {r.pos.x - 120.0f, r.pos.y - r.vel.y * 0.2f};
             beam[1].position = r.pos;
             beam[0].color = sf::Color(220, 220, 220, 120);
@@ -149,7 +151,7 @@ int main() {
             window.draw(beam);
 
             sf::CircleShape head(7.0f);
-            head.setOrigin(7.0f, 7.0f);
+            head.setOrigin({7.0f, 7.0f});
             head.setPosition(r.pos);
             head.setFillColor(sf::Color(255, 255, 255, 220));
             window.draw(head);
@@ -157,7 +159,7 @@ int main() {
             if (r.hasEnemy && r.life < (4.4f - r.enemyDelay)) {
                 const sf::Vector2f enemyPos = {r.pos.x - 60.0f, r.pos.y + 15.0f};
 
-                sf::VertexArray enemyBeam(sf::Lines, 2);
+                sf::VertexArray enemyBeam(sf::PrimitiveType::Lines, 2);
                 enemyBeam[0].position = {enemyPos.x - 80.0f, enemyPos.y};
                 enemyBeam[1].position = enemyPos;
                 enemyBeam[0].color = sf::Color(255, 50, 50, 130);
@@ -165,7 +167,7 @@ int main() {
                 window.draw(enemyBeam);
 
                 sf::CircleShape enemyHead(6.0f);
-                enemyHead.setOrigin(6.0f, 6.0f);
+                enemyHead.setOrigin({6.0f, 6.0f});
                 enemyHead.setPosition(enemyPos);
                 enemyHead.setFillColor(sf::Color(255, 70, 70, 220));
                 window.draw(enemyHead);
@@ -179,7 +181,7 @@ int main() {
             window.draw(title);
         }
 
-        sf::RectangleShape divider(sf::Vector2f(310.0f, 2.0f));
+        sf::RectangleShape divider({310.0f, 2.0f});
         divider.setPosition({menuLeft, 195.0f});
         divider.setFillColor(sf::Color(255, 255, 255, 90));
         window.draw(divider);
@@ -204,7 +206,7 @@ int main() {
             if (fontLoaded) {
                 sf::Text text(font, b.text, 30);
                 text.setFillColor(sf::Color::White);
-                sf::FloatRect bounds = text.getLocalBounds();
+                const sf::FloatRect bounds = text.getLocalBounds();
                 text.setPosition({
                     x + (b.rect.size.x - bounds.size.x) * 0.5f,
                     y + (b.rect.size.y - bounds.size.y) * 0.5f - 8.0f
