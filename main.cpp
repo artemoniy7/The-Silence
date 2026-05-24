@@ -60,11 +60,22 @@ int main() {
     const float height = 72.0f;
     const float gap = 22.0f;
 
-    std::vector<Button> buttons = {
-        {"Levels", {menuLeft, startY, width, height}},
-        {"Settings", {menuLeft, startY + (height + gap), width, height}},
-        {"Exit", {menuLeft, startY + 2.0f * (height + gap), width, height}}
-    };
+    std::vector<Button> buttons;
+
+    Button levelsButton;
+    levelsButton.text = "Levels";
+    levelsButton.rect = sf::FloatRect({menuLeft, startY}, {width, height});
+    buttons.push_back(levelsButton);
+
+    Button settingsButton;
+    settingsButton.text = "Settings";
+    settingsButton.rect = sf::FloatRect({menuLeft, startY + (height + gap)}, {width, height});
+    buttons.push_back(settingsButton);
+
+    Button exitButton;
+    exitButton.text = "Exit";
+    exitButton.rect = sf::FloatRect({menuLeft, startY + 2.0f * (height + gap)}, {width, height});
+    buttons.push_back(exitButton);
 
     std::vector<Runner> runners;
     float spawnTimer = 0.0f;
