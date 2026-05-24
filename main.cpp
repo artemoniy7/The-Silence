@@ -153,34 +153,39 @@ int main() {
             window.draw(stripe);
         }
 
+        auto drawRadialGlow = [&window](const sf::Vector2f& center, float radius, const sf::Color& coreColor) {
+            constexpr int segmentCount = 36;
+            sf::VertexArray glow(sf::PrimitiveType::TriangleFan, segmentCount + 2);
+            glow[0].position = center;
+            glow[0].color = coreColor;
+
+            for (int i = 0; i <= segmentCount; ++i) {
+                const float angle = static_cast<float>(i) / static_cast<float>(segmentCount) * 6.2831853f;
+                const sf::Vector2f dir = {std::cos(angle), std::sin(angle)};
+                glow[i + 1].position = center + dir * radius;
+                glow[i + 1].color = sf::Color(coreColor.r, coreColor.g, coreColor.b, 0);
+            }
+
+            window.draw(glow);
+        };
+
         for (const Runner& r : runners) {
-            sf::VertexArray beam(sf::PrimitiveType::Lines, 2);
-            beam[0].position = {r.pos.x - 120.0f, r.pos.y - r.vel.y * 0.2f};
-            beam[1].position = r.pos;
-            beam[0].color = sf::Color(220, 220, 220, 120);
-            beam[1].color = sf::Color(255, 255, 255, 200);
-            window.draw(beam);
+            drawRadialGlow(r.pos, 48.0f, sf::Color(255, 255, 255, 120));
 
             sf::CircleShape head(7.0f);
             head.setOrigin({7.0f, 7.0f});
             head.setPosition(r.pos);
-            head.setFillColor(sf::Color(255, 255, 255, 220));
+            head.setFillColor(sf::Color(255, 255, 255, 230));
             window.draw(head);
 
             if (r.hasEnemy && r.life < (4.4f - r.enemyDelay)) {
                 const sf::Vector2f enemyPos = {r.pos.x - 60.0f, r.pos.y + 15.0f};
-
-                sf::VertexArray enemyBeam(sf::PrimitiveType::Lines, 2);
-                enemyBeam[0].position = {enemyPos.x - 80.0f, enemyPos.y};
-                enemyBeam[1].position = enemyPos;
-                enemyBeam[0].color = sf::Color(255, 50, 50, 130);
-                enemyBeam[1].color = sf::Color(255, 70, 70, 220);
-                window.draw(enemyBeam);
+                drawRadialGlow(enemyPos, 42.0f, sf::Color(255, 70, 70, 110));
 
                 sf::CircleShape enemyHead(6.0f);
                 enemyHead.setOrigin({6.0f, 6.0f});
                 enemyHead.setPosition(enemyPos);
-                enemyHead.setFillColor(sf::Color(255, 70, 70, 220));
+                enemyHead.setFillColor(sf::Color(255, 80, 80, 225));
                 window.draw(enemyHead);
             }
         }
